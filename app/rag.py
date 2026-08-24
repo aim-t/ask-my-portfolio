@@ -176,7 +176,14 @@ def load_documents(data_dir=DATA_DIR):
 
 
 def get_client():
-    return chromadb.PersistentClient(path=str(CHROMA_DIR))
+    # anonymized_telemetry=False: the version of posthog this chromadb
+    # release depends on has a different capture() signature than
+    # chromadb's telemetry code calls, so every event throws and gets
+    # logged as "Failed to send telemetry event" - harmless, but disabling
+    # it outright is cleaner than leaving that noise on every startup/query.
+    return chromadb.PersistentClient(
+        path=str(CHROMA_DIR), settings=chromadb.Settings(anonymized_telemetry=False)
+    )
 
 
 def get_collection(client=None):
