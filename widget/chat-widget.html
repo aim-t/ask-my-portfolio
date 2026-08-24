@@ -18,23 +18,36 @@
 <title>Ask My Portfolio</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💬</text></svg>">
 <style>
+  /*
+    Colors/fonts/radius below read aimantariq.tech's own CSS custom
+    properties (--primary-color, --background-color, etc., set on
+    body[data-theme] by the site's theme toggle) with light-theme
+    fallback values. Per SETUP.md this widget's markup gets pasted
+    directly into the Gatsby page, so it inherits those variables and
+    matches the site's live theme - including dark mode - automatically.
+    The fallbacks only kick in when this file is opened standalone.
+  */
   #amp-widget-root {
     position: fixed;
     bottom: 20px;
     right: 20px;
     z-index: 9999;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-family: var(--base-font, "Roboto", Arial, sans-serif);
   }
   #amp-bubble {
     width: 56px;
     height: 56px;
     border-radius: 50%;
-    background: #17365d;
-    color: #fff;
+    background: var(--primary-color, #000);
+    color: var(--background-color, #fff);
     border: none;
     cursor: pointer;
     font-size: 24px;
-    box-shadow: 0 4px 14px rgba(0,0,0,0.25);
+    box-shadow: 0 5px 15px var(--box-shadow-color, rgba(0,0,0,.16));
+    transition: box-shadow .3s ease-out;
+  }
+  #amp-bubble:hover {
+    box-shadow: 0 5px 15px var(--box-shadow-hover-color, rgba(0,0,0,.32));
   }
   #amp-panel {
     display: none;
@@ -43,9 +56,9 @@
     right: 0;
     width: 340px;
     max-height: 460px;
-    background: #fff;
-    border-radius: 12px;
-    box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+    background: var(--card-background-color, #fff);
+    border-radius: var(--border-radius, 1rem);
+    box-shadow: 0 5px 15px var(--box-shadow-color, rgba(0,0,0,.16));
     overflow: hidden;
     flex-direction: column;
   }
@@ -55,17 +68,17 @@
     align-items: flex-start;
     justify-content: space-between;
     gap: 8px;
-    background: #17365d;
-    color: #fff;
+    background: var(--primary-color, #000);
+    color: var(--background-color, #fff);
     padding: 12px 14px;
-    font-weight: 600;
+    font-weight: 700;
     font-size: 14px;
   }
   #amp-header small { display: block; font-weight: 400; opacity: 0.8; font-size: 11px; margin-top: 2px; }
   #amp-close {
     background: transparent;
     border: none;
-    color: #fff;
+    color: var(--background-color, #fff);
     opacity: 0.75;
     font-size: 18px;
     line-height: 1;
@@ -80,40 +93,46 @@
     padding: 12px;
     font-size: 13px;
     line-height: 1.4;
-    color: #1a1a1a;
+    color: var(--text-color, #000);
+    background: var(--card-background-color, #fff);
   }
   .amp-msg { margin-bottom: 10px; max-width: 90%; }
   .amp-msg.user { margin-left: auto; text-align: right; }
   .amp-bubble-text {
     display: inline-block;
     padding: 8px 11px;
-    border-radius: 10px;
+    border-radius: var(--border-radius, 1rem);
   }
-  .amp-msg.user .amp-bubble-text { background: #17365d; color: #fff; }
-  .amp-msg.bot .amp-bubble-text { background: #f0f2f5; color: #1a1a1a; }
-  .amp-sources { font-size: 10px; color: #888; margin-top: 3px; }
+  .amp-msg.user .amp-bubble-text { background: var(--primary-color, #000); color: var(--background-color, #fff); }
+  .amp-msg.bot .amp-bubble-text { background: var(--tertiary-color, #f2f2f2); color: var(--text-color, #000); }
+  .amp-sources { font-size: 10px; color: var(--subtext-color, #555); margin-top: 3px; }
   #amp-inputrow {
     display: flex;
-    border-top: 1px solid #eee;
+    border-top: 1px solid var(--tertiary-color, #f2f2f2);
     padding: 8px;
     gap: 6px;
   }
   #amp-input {
     flex: 1;
-    border: 1px solid #ddd;
-    border-radius: 8px;
+    border: 1px solid var(--tertiary-color, #f2f2f2);
+    border-radius: var(--border-radius, 1rem);
     padding: 8px 10px;
     font-size: 13px;
+    font-family: inherit;
     outline: none;
+    color: var(--text-color, #000);
+    background: var(--card-background-color, #fff);
   }
   #amp-send {
-    background: #17365d;
-    color: #fff;
+    background: var(--primary-color, #000);
+    color: var(--background-color, #fff);
     border: none;
-    border-radius: 8px;
+    border-radius: var(--border-radius, 1rem);
     padding: 0 14px;
     cursor: pointer;
     font-size: 13px;
+    font-weight: 700;
+    font-family: inherit;
   }
   #amp-send:disabled { opacity: 0.5; cursor: default; }
 </style>
