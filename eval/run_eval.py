@@ -26,6 +26,7 @@ to finish in five minutes and explain confidently in an interview.
 import argparse
 import json
 import sys
+import time
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
@@ -61,13 +62,33 @@ def score_retrieval(cases):
     return recall, results
 
 
+def _generate_with_retry(question, chunks, retries=4, base_wait_seconds=20):
+    """
+    Free-tier LLM quotas (e.g. Gemini's 5 requests/minute) are easy to hit
+    when scoring 12 questions back to back. Retry with growing backoff on a
+    rate-limit error before giving up, instead of failing the whole run.
+    """
+    for attempt in range(retries):
+        try:
+            return generate(question, chunks)
+        except NoProviderAvailable as e:
+            is_rate_limit = "429" in str(e) or "quota" in str(e).lower()
+            if not is_rate_limit or attempt == retries - 1:
+                raise
+            time.sleep(base_wait_seconds * (attempt + 1))
+
+
 def score_generation(cases):
     results = []
     hits = 0
-    for case in cases:
+    for i, case in enumerate(cases):
+        if i > 0:
+            # Stay comfortably under a 5-requests/minute free tier instead
+            # of relying on the retry loop to recover every time.
+            time.sleep(13)
         chunks = rag.retrieve(case["question"])
         try:
-            answer, provider = generate(case["question"], chunks)
+            answer, provider = _generate_with_retry(case["question"], chunks)
         except NoProviderAvailable as e:
             return None, [{"error": str(e)}]
 
