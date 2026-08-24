@@ -13,9 +13,9 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
-from app.config import ALLOWED_ORIGINS, OPENAI_API_KEY, ANTHROPIC_API_KEY, GEMINI_API_KEY
+from app.config import ALLOWED_ORIGINS
 from app import rag
-from app.llm import generate, NoProviderAvailable
+from app.llm import generate, NoProviderAvailable, PROVIDER_CHAIN
 
 app = FastAPI(title="Ask My Portfolio API", version="1.0.0")
 
@@ -51,15 +51,11 @@ def root():
 
 @app.get("/health")
 def health():
-    providers_configured = [
-        name
-        for name, key in [
-            ("openai", OPENAI_API_KEY),
-            ("anthropic", ANTHROPIC_API_KEY),
-            ("gemini", GEMINI_API_KEY),
-        ]
-        if key
-    ]
+    # Derived from PROVIDER_CHAIN, the same list app/llm.py actually uses
+    # to generate answers, rather than a separately maintained copy - a
+    # hardcoded second list here is exactly what let this drift out of
+    # sync when Groq was added as a fourth provider.
+    providers_configured = [name for name, key, _ in PROVIDER_CHAIN if key]
     return {
         "status": "ok",
         "indexed_chunks": _state["indexed_chunks"],

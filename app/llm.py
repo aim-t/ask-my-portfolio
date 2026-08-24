@@ -83,6 +83,13 @@ def _call_groq(prompt, system):
         ],
         temperature=0.2,
         max_tokens=500,
+        # GROQ_MODEL defaults to a reasoning model (openai/gpt-oss-20b),
+        # which spends some of max_tokens on hidden reasoning before any
+        # visible answer - a low reasoning budget was tested to still
+        # answer correctly while leaving comfortable room under 500
+        # tokens; "none" risked empty answers on questions that need any
+        # reasoning at all.
+        reasoning_effort="low",
     )
     return resp.choices[0].message.content.strip()
 
