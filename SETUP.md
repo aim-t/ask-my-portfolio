@@ -19,17 +19,18 @@ Follow this in order. Everything up to "get an API key" needs nothing from you e
 
 ## Day 1, midday: get one API key (10-15 min)
 
-You only need ONE of these, not all three. Pick whichever you can get fastest:
+You only need ONE of these, not all four. Pick whichever you can get fastest:
 
 - OpenAI: platform.openai.com -> API keys. Needs a payment method on file but a few dollars of credit covers this project many times over.
 - Anthropic: console.anthropic.com -> API keys. Same idea.
-- Google Gemini: aistudio.google.com -> Get API key. Has a free tier, usually the fastest to get working with no card required.
+- Google Gemini: aistudio.google.com -> Get API key. Has a free tier, usually the fastest to get working with no card required. Its free tier caps out at 20 requests/day on the model this project defaults to, which is easy to hit if you're iterating a lot - Groq below is the fix if you do.
+- Groq: console.groq.com -> API keys. Also free, no card required, and with much higher rate limits than Gemini's free tier. Runs open models (Llama, etc.) instead of Gemini's own.
 
 Copy `.env.example` to `.env` and paste the key in:
 ```
 cp .env.example .env
 ```
-Edit `.env` and fill in ONE of `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, or `GEMINI_API_KEY`.
+Edit `.env` and fill in ONE of `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `GEMINI_API_KEY`, or `GROQ_API_KEY`. Add a second one too if you want automatic fallback when the first is rate-limited or down.
 
 ## Day 1, afternoon: run it and talk to it (15 min)
 
@@ -89,7 +90,7 @@ Whichever you pick, once it is live, hit `https://your-deployed-url/health` and 
 
 Add a short entry to your CV/portfolio project list. A version you can paste directly:
 
-> **Ask My Portfolio** - A RAG chatbot that answers recruiter questions about my background, grounded in my real CV data. Built with FastAPI, ChromaDB, and a multi-provider LLM fallback (OpenAI/Anthropic/Gemini). Retrieval is measured against a handwritten evaluation set (100% recall@4) rather than asserted, and the deployed app is red-teamed with DeepTeam against prompt injection, hallucination, and instruction leakage. Deployed with Docker; try it live at the chat bubble on this site.
+> **Ask My Portfolio** - A RAG chatbot that answers recruiter questions about my background, grounded in my real CV data. Built with FastAPI, ChromaDB, and a multi-provider LLM fallback (OpenAI/Anthropic/Gemini/Groq). Retrieval is measured against a handwritten evaluation set (100% recall@4) rather than asserted, and the deployed app is red-teamed with DeepTeam against prompt injection, hallucination, and instruction leakage. Deployed with Docker; try it live at the chat bubble on this site.
 >
 > GitHub: [link once you push it] | Live: aimantariq.tech
 
@@ -99,6 +100,7 @@ Push the code to a public GitHub repo before you link it anywhere - that repo, w
 
 - `python -m eval.run_eval` fails on import: you probably skipped `pip install -r requirements.txt` or forgot to activate the virtual environment.
 - `/chat` returns a 503 with "No LLM provider is configured": your `.env` key is missing, misspelled, or the app was started before you saved `.env` (restart `uvicorn` after editing `.env`).
+- `/chat` returns a 503 with "All configured providers failed" and a quota/429 message: this is a different situation than the one above - a key IS configured, but the provider itself is rate-limited or over quota right now (Gemini's free tier caps at 20 requests/day on the default model, which is easy to hit during normal testing). It usually clears on its own; adding `GROQ_API_KEY` as a second key gives the app an automatic fallback for exactly this case.
 - The widget shows "Sorry, I couldn't reach the backend": check `API_BASE_URL` in `chat-widget.html` matches your deployed URL exactly, including `https://`, and that your host's `ALLOWED_ORIGINS` includes your site's real domain.
 - Docker build fails on `pip install`: make sure you are using the provided `Dockerfile` as-is; it installs `build-essential` specifically because `scikit-learn` needs it on a slim base image.
 - `import deepteam` fails with `ModuleNotFoundError: No module named 'sentry_sdk'`: this is a real gap in deepteam 1.0.9's own dependency list, not something you did wrong. `pip install -r requirements-redteam.txt` already includes the fix; if you installed `deepteam` some other way, run `pip install sentry-sdk` too.
