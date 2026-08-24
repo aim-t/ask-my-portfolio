@@ -1,8 +1,8 @@
 # Ask My Portfolio
 
-A Retrieval-Augmented Generation (RAG) chatbot that answers questions about Aiman Tariq's background, grounded in his actual CV and project history, deployable behind a real API and embeddable on a portfolio site.
+A Retrieval-Augmented Generation (RAG) chatbot that answers questions about Aiman Tariq's background, grounded in her actual CV and project history, deployable behind a real API and embeddable on a portfolio site.
 
-Ask it things like "Does Aiman have RAG experience?" or "What did he build at PookiDevs?" and it retrieves the relevant facts from his own data and generates a grounded answer, citing which file the answer came from.
+Ask it things like "Does Aiman have RAG experience?" or "What did she build at PookiDevs?" and it retrieves the relevant facts from her own data and generates a grounded answer, citing which file the answer came from.
 
 ## Why this project
 

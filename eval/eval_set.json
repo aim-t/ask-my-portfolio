@@ -5,12 +5,12 @@
     "expected_keywords": ["IELTS", "8.0"]
   },
   {
-    "question": "Where is Aiman currently studying and what is his MSc in?",
+    "question": "Where is Aiman currently studying and what is her MSc in?",
     "expected_source": "about.md",
     "expected_keywords": ["Szechenyi", "Computer Science"]
   },
   {
-    "question": "What was Aiman's Bachelor's degree and where did he get it?",
+    "question": "What was Aiman's Bachelor's degree and where did she get it?",
     "expected_source": "about.md",
     "expected_keywords": ["Electrical Engineering", "NUST"]
   },
