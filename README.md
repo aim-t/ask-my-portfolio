@@ -4,6 +4,8 @@ A Retrieval-Augmented Generation (RAG) chatbot that answers questions about Aima
 
 Ask it things like "Does Aiman have RAG experience?" or "What did she build at PookiDevs?" and it retrieves the relevant facts from her own data and generates a grounded answer, citing which file the answer came from.
 
+It also ships with a red-team report (`redteam/`) built on DeepTeam, an open-source AI red-teaming framework, scanning the deployed chatbot itself for prompt injection, fabricated facts, and instruction leakage.
+
 ## Why this project
 
 Bare RAG demos are common in 2026 hiring pipelines; what separates candidates is measured evaluation and production maturity rather than an unverified "it works" claim. This project is built around three things a plain chatbot demo does not have: a retrieval layer that is tested against a handwritten evaluation set with measured numbers, a multi-provider LLM fallback pattern already proven in production (the same pattern used at PookiDevs), and a deployment path (FastAPI, Docker) rather than a notebook.
@@ -27,6 +29,10 @@ app/main.py             -> FastAPI: POST /chat, GET /health
       |
       v
 widget/chat-widget.html  -> drop-in chat bubble that calls /chat
+
+redteam/target.py         -> wraps /chat as a DeepTeam model_callback
+redteam/run_redteam.py    -> runs DeepTeam's attacks against it
+redteam/report.py         -> turns the results into report.md
 ```
 
 ## Decisions
@@ -38,6 +44,8 @@ widget/chat-widget.html  -> drop-in chat bubble that calls /chat
 **Multi-provider LLM fallback.** Mirrors the pattern already shipped in production at PookiDevs: try OpenAI, fall back to Anthropic, fall back to Gemini. If one provider is down, rate-limited, or its key is missing, the next one is tried automatically. Add a fourth provider by writing one function with the same signature in `app/llm.py`.
 
 **Chunking by markdown section, not fixed word count.** Each `##` header in a data file becomes its own chunk boundary before word-count chunking is applied within it. This keeps unrelated topics (e.g. "Database Management" and "Soft Skills" in `skills.md`) from being merged into a single diluted chunk, which measurably improved retrieval recall during development.
+
+**Red-teaming: DeepTeam, scoped to what this app can actually do.** This app has no tools and no database write path reachable from user input, so most of DeepTeam's 50+ vulnerability types (SQL injection, SSRF, tool/agent abuse) do not apply. `redteam/run_redteam.py` scopes the scan to six vulnerabilities that do apply to a grounded text-only chatbot (prompt/instruction leakage, PII fabrication, misinformation, hallucination, goal hijacking, social-engineering goal theft) against four attack methods (prompt injection, roleplay, system override, goal redirection), and explains that scoping decision in the script's own docstring rather than running every vulnerability DeepTeam ships and calling it thorough.
 
 ## Measured results
 
@@ -79,6 +87,16 @@ uvicorn app.main:app --reload
 
 Then open `http://localhost:8000/docs` for interactive API docs, or open `widget/chat-widget.html` directly in a browser (it points at `http://localhost:8000` by default).
 
+## Running the red-team report
+
+```
+pip install -r requirements-redteam.txt   # separate from the app's own deps on purpose
+python redteam/target.py                  # zero-cost sanity check the app is reachable
+python -m redteam.run_redteam             # needs OPENAI_API_KEY - the actual scan
+```
+
+Results land in `redteam/results/`: a timestamped JSON (DeepTeam's own format) and a `report.md` you can paste straight into a portfolio writeup or link from your CV.
+
 ## What you need to supply
 
-Everything in this repository runs and is tested with zero API keys except the final "generate an answer" step, which needs at least one of `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, or `GEMINI_API_KEY` in `.env`. That call cannot be exercised without a real key, so it has not been tested end to end here; the retrieval layer it depends on has been, with the numbers above.
+Everything in this repository runs and is tested with zero API keys except two things: the app's own "generate an answer" step (needs one of `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, or `GEMINI_API_KEY`), and the red-team scan (needs `OPENAI_API_KEY` specifically, since that's what DeepTeam's default simulator/evaluator models use). Neither has been run end to end here for that reason; everything upstream of them (retrieval, the app's startup and error handling, the red-team harness's connectivity check and callback wiring) has been, with the numbers and command output above.

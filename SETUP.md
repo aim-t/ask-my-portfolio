@@ -55,6 +55,18 @@ Everything the bot knows lives in `data/*.md`. This is the highest-leverage 30 m
 
 You do not need to touch any Python code to update what the bot knows.
 
+## Day 1, late evening (optional, 15-20 min): generate the red-team report
+
+This step is separate from getting the chatbot live and can be done any time after Day 1 morning, as long as the app is running locally with an API key configured.
+
+```
+pip install -r requirements-redteam.txt
+python redteam/target.py          # confirm the app is reachable, costs nothing
+python -m redteam.run_redteam     # the real scan - needs OPENAI_API_KEY specifically
+```
+
+This needs `OPENAI_API_KEY` even if you configured a different provider as your main chatbot's key, since DeepTeam's own attack-generation and judging models default to OpenAI. It takes a few minutes and costs a few cents. When it finishes, open `redteam/results/report.md` - that is the write-up-ready summary of what it tried and what the app did about it.
+
 ## Day 2, morning: deploy the API (45-90 min)
 
 Pick one, all have generous free tiers and both work with the Dockerfile as-is:
@@ -77,7 +89,7 @@ Whichever you pick, once it is live, hit `https://your-deployed-url/health` and 
 
 Add a short entry to your CV/portfolio project list. A version you can paste directly:
 
-> **Ask My Portfolio** - A RAG chatbot that answers recruiter questions about my background, grounded in my real CV data. Built with FastAPI, ChromaDB, and a multi-provider LLM fallback (OpenAI/Anthropic/Gemini). Retrieval is measured against a handwritten evaluation set (100% recall@4) rather than asserted. Deployed with Docker; try it live at the chat bubble on this site.
+> **Ask My Portfolio** - A RAG chatbot that answers recruiter questions about my background, grounded in my real CV data. Built with FastAPI, ChromaDB, and a multi-provider LLM fallback (OpenAI/Anthropic/Gemini). Retrieval is measured against a handwritten evaluation set (100% recall@4) rather than asserted, and the deployed app is red-teamed with DeepTeam against prompt injection, hallucination, and instruction leakage. Deployed with Docker; try it live at the chat bubble on this site.
 >
 > GitHub: [link once you push it] | Live: aimantariq.tech
 
@@ -89,3 +101,5 @@ Push the code to a public GitHub repo before you link it anywhere - that repo, w
 - `/chat` returns a 503 with "No LLM provider is configured": your `.env` key is missing, misspelled, or the app was started before you saved `.env` (restart `uvicorn` after editing `.env`).
 - The widget shows "Sorry, I couldn't reach the backend": check `API_BASE_URL` in `chat-widget.html` matches your deployed URL exactly, including `https://`, and that your host's `ALLOWED_ORIGINS` includes your site's real domain.
 - Docker build fails on `pip install`: make sure you are using the provided `Dockerfile` as-is; it installs `build-essential` specifically because `scikit-learn` needs it on a slim base image.
+- `import deepteam` fails with `ModuleNotFoundError: No module named 'sentry_sdk'`: this is a real gap in deepteam 1.0.9's own dependency list, not something you did wrong. `pip install -r requirements-redteam.txt` already includes the fix; if you installed `deepteam` some other way, run `pip install sentry-sdk` too.
+- `python -m redteam.run_redteam` exits immediately with an OPENAI_API_KEY message: that is expected and by design, it is a cheap check before any spend happens. DeepTeam's default judge model is OpenAI's regardless of which provider your chatbot itself uses.
