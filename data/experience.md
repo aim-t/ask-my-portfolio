@@ -1,5 +1,9 @@
 # Work Experience
 
+## International Summer School Participant, Human-Centered AI - University "Ukshin Hoti" Prizren (5-14 August 2026, Prizren, Kosovo)
+
+Aiman attended the International Summer School 2026 on Human-Centered AI and Emerging Digital Technologies at the Faculty of Computer Science, University "Ukshin Hoti" Prizren, Kosovo (4 credits), studying spec-driven development, agentic systems, evaluation, harness engineering, and red-teaming for AI systems under Prof. Suejb Memeti. She completed a hands-on project applying these concepts alongside the lecture sessions.
+
 ## Integration Lead, AI Robotics Camp - Audi Development Camp (20-27 July 2026, Gyor, Hungary)
 
 Aiman was Integration Lead on a team building a simulated humanoid robot (Unitree G1, 29 degrees of freedom) reinforcement-learning workflow. She created and managed the team's GitHub repository and branching strategy, and reviewed and merged code across the team. She also built a local GUI application to visualize live MuJoCo robot simulations, tracking performance metrics and outputs in real time to support team demos.
