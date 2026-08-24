@@ -24,3 +24,5 @@ dist-widget
 *.njsproj
 *.sln
 *.sw?
+.vercel
+.env*
