@@ -6,6 +6,25 @@ Ask it things like "Does Aiman have RAG experience?" or "What did she build at P
 
 It also ships with a red-team report (`redteam/`) built on DeepTeam, an open-source AI red-teaming framework, scanning the deployed chatbot itself for prompt injection, fabricated facts, and instruction leakage.
 
+## Live demo
+
+- **App**: [ask-aimans-portfolio.vercel.app](https://ask-aimans-portfolio.vercel.app)
+- **API**: [ask-my-portfolio.onrender.com](https://ask-my-portfolio.onrender.com) (interactive docs at `/docs`, health at `/health`)
+
+The API runs on Render's free tier, which spins down after about 15 minutes idle - the first request after a quiet period can take 30-50s to wake back up. Everything after that is normal speed.
+
+## Screenshots
+
+![Ask My Portfolio demo: typing a question and getting a grounded, cited answer](docs/demo.gif)
+
+| Dark (default) | Light |
+|---|---|
+| ![Dark mode: phosphor terminal](docs/screenshots/dark-chat.png) | ![Light mode: carbon-copy paper](docs/screenshots/light-chat.png) |
+
+Dark mode is a phosphor-terminal look: Fira Code (the same font [aimantariq.tech](https://aimantariq.tech) already uses for its own code blocks), green-on-near-black, a terminal-window chrome around the chat panel. Light mode is not that palette inverted - it is a different aesthetic on purpose, a carbon-copy typewritten page with a rust-red accent pulled from the classic two-tone typewriter ribbon. Full writeup of that decision in [`frontend/README.md`](frontend/README.md).
+
+<img src="docs/screenshots/mobile.png" alt="Mobile layout" width="280">
+
 ## Why this project
 
 Bare RAG demos are common in 2026 hiring pipelines; what separates candidates is measured evaluation and production maturity rather than an unverified "it works" claim. This project is built around three things a plain chatbot demo does not have: a retrieval layer that is tested against a handwritten evaluation set with measured numbers, a multi-provider LLM fallback pattern already proven in production (the same pattern used at PookiDevs), and a deployment path (FastAPI, Docker) rather than a notebook.
@@ -28,12 +47,20 @@ app/llm.py             -> build a grounded prompt from the retrieved
 app/main.py             -> FastAPI: POST /chat, GET /health
       |
       v
-widget/chat-widget.html  -> drop-in chat bubble that calls /chat
+      +-----------------------------+
+      |                             |
+widget/chat-widget.html    frontend/ (React app + widget bundle,
+  drop-in chat bubble        two build targets sharing one
+  that calls /chat           ChatPanel component, see below)
 
 redteam/target.py         -> wraps /chat as a DeepTeam model_callback
 redteam/run_redteam.py    -> runs DeepTeam's attacks against it
 redteam/report.py         -> turns the results into report.md
 ```
+
+Deployed as two independent pieces: the FastAPI backend on Render (Docker), the
+`frontend/` app on Vercel (static build), talking to each other over `VITE_API_BASE_URL`
+and CORS - see [Deployment](#deployment) below.
 
 ## Decisions
 
@@ -77,6 +104,8 @@ frontend/
   chat component: a standalone app (npm run build) and an embeddable
   widget bundle (npm run build:widget). Dev server: npm run dev (after
   npm install and cp .env.example .env). See frontend/README.md.
+docs/
+  demo.gif, screenshots/   used in this README, not part of the app
 Dockerfile, docker-compose.yml, requirements.txt, .env.example
 ```
 
@@ -92,6 +121,26 @@ uvicorn app.main:app --reload
 
 Then open `http://localhost:8000/docs` for interactive API docs, or open `widget/chat-widget.html` directly in a browser (it points at `http://localhost:8000` by default).
 
+For the React frontend instead, with the backend above still running:
+
+```
+cd frontend
+npm install
+cp .env.example .env
+npm run dev
+```
+
+Opens on `http://localhost:3000` (not Vite's default 5173 - see `frontend/README.md` for why). Full details, including the widget build, in that file.
+
+## Deployment
+
+The live demo above runs on two independent free-tier services:
+
+- **Backend -> Render**, deployed from the `Dockerfile` at the repo root, auto-deploying on push to `main`. Environment variables: whichever LLM provider key(s) you have, plus `ALLOWED_ORIGINS` set to your frontend's real URL (CORS blocks everything else by default).
+- **Frontend -> Vercel**, deployed from `frontend/` (Vercel auto-detects the Vite framework). Environment variable: `VITE_API_BASE_URL` set to the Render backend's URL - Vite bakes this in at build time, so it needs to be set before building, not after.
+
+Both are plain dashboard-driven setups (Render needs a one-time GitHub authorization; Vercel's CLI can deploy directly once logged in), matching the free-tier deploy story `SETUP.md` already describes for the backend alone.
+
 ## Running the red-team report
 
 ```
@@ -104,4 +153,4 @@ Results land in `redteam/results/`: a timestamped JSON (DeepTeam's own format) a
 
 ## What you need to supply
 
-Everything in this repository runs and is tested with zero API keys except two things: the app's own "generate an answer" step (needs one of `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `GEMINI_API_KEY`, or `GROQ_API_KEY`), and the red-team scan (needs `OPENAI_API_KEY` specifically, since that's what DeepTeam's default simulator/evaluator models use). Neither has been run end to end here for that reason; everything upstream of them (retrieval, the app's startup and error handling, the red-team harness's connectivity check and callback wiring) has been, with the numbers and command output above.
+Everything in this repository runs and is tested with zero API keys except two things: the app's own "generate an answer" step (needs one of `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `GEMINI_API_KEY`, or `GROQ_API_KEY`), and the red-team scan (needs `OPENAI_API_KEY` specifically, since that's what DeepTeam's default simulator/evaluator models use). The generation step has since been run end to end, including in production - that is what the live demo above actually is, with `GEMINI_API_KEY` and `GROQ_API_KEY` configured on the deployed backend. The red-team scan has not, since it needs an OpenAI key specifically and none is configured anywhere in this project yet; everything upstream of it (retrieval, the app's startup and error handling, the red-team harness's connectivity check and callback wiring) has been, with the numbers and command output above.
