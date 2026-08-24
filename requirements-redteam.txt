@@ -1,0 +1,12 @@
+# Extra dependencies for the red-team report only (redteam/run_redteam.py).
+# Kept separate from requirements.txt on purpose: DeepTeam and its
+# dependencies are a dev-time/report-time tool, not something the deployed
+# chatbot needs at runtime, so the production Docker image stays slim.
+#
+# Install with: pip install -r requirements-redteam.txt
+
+deepteam==1.0.9
+# deepteam 1.0.9 imports sentry_sdk for anonymous telemetry but does not
+# declare it as a dependency - without this line, `import deepteam` fails
+# with ModuleNotFoundError: No module named 'sentry_sdk'.
+sentry-sdk==2.68.1
