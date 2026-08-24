@@ -28,24 +28,25 @@ export function ChatInput({ onSend, isLoading }: ChatInputProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex gap-2">
+    <form onSubmit={handleSubmit} className="flex items-center gap-2">
+      <span className="text-accent pl-1 select-none">{">"}</span>
       <input
         type="text"
         value={value}
         onChange={(e) => setValue(e.target.value)}
         onKeyDown={handleKeyDown}
-        placeholder="e.g. Does Aiman have RAG experience?"
+        placeholder="ask a question..."
         aria-label="Ask a question about Aiman's background"
         disabled={isLoading}
-        className="flex-1 rounded-xl border border-neutral-300 bg-white px-3.5 py-2.5 text-sm text-neutral-900 outline-none placeholder:text-neutral-400 focus-visible:ring-2 focus-visible:ring-neutral-900 disabled:opacity-60 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100 dark:placeholder:text-neutral-500 dark:focus-visible:ring-neutral-100"
+        className="text-fg placeholder:text-fg-dim min-w-0 flex-1 bg-transparent py-1.5 text-sm outline-none disabled:opacity-60"
       />
       <button
         type="submit"
         disabled={isLoading || !value.trim()}
         aria-label="Send question"
-        className="rounded-xl bg-neutral-900 px-4 py-2.5 text-sm font-medium text-white outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-neutral-900 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-neutral-100 dark:text-neutral-900 dark:focus-visible:ring-neutral-100 dark:focus-visible:ring-offset-neutral-950"
+        className="text-fg-dim hover:text-accent hover:border-accent border-border focus-visible:ring-accent shrink-0 rounded-md border px-2.5 py-1.5 text-xs whitespace-nowrap outline-none transition-colors focus-visible:ring-2 disabled:cursor-not-allowed disabled:opacity-40"
       >
-        {isLoading ? "..." : "Send"}
+        {isLoading ? "[ ... ]" : "[ send ]"}
       </button>
     </form>
   );

@@ -4,13 +4,15 @@ import { Header } from "./components/Header";
 
 function App() {
   return (
-    <div className="min-h-screen bg-white text-neutral-900 dark:bg-neutral-950 dark:text-neutral-100">
+    <div className="bg-bg min-h-screen">
       <main className="mx-auto flex max-w-2xl flex-col gap-8 px-4 py-10 sm:px-6">
         <Header />
-        <section className="rounded-2xl border border-neutral-200 p-4 dark:border-neutral-800">
+        <div className="stagger-in" style={{ animationDelay: "1.3s" }}>
           <ChatPanel className="h-[28rem]" />
-        </section>
-        <AboutSection />
+        </div>
+        <div className="stagger-in" style={{ animationDelay: "1.5s" }}>
+          <AboutSection />
+        </div>
       </main>
     </div>
   );

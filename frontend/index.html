@@ -9,8 +9,27 @@
       content="Ask questions about Aiman Tariq's background, answered from her real CV by a retrieval-augmented chatbot."
     />
     <title>Ask My Portfolio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
   </head>
   <body>
+    <script>
+      // Blocking, runs before first paint: avoids a flash of the wrong
+      // theme, since the app defaults to dark rather than following
+      // prefers-color-scheme (see src/lib/useTheme.ts).
+      (function () {
+        try {
+          var stored = localStorage.getItem("amp-theme");
+          if (stored !== "light") document.documentElement.classList.add("dark");
+        } catch {
+          document.documentElement.classList.add("dark");
+        }
+      })();
+    </script>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

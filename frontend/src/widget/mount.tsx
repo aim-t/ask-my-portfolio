@@ -3,9 +3,22 @@ import { WidgetShell } from "./WidgetShell";
 import widgetCss from "./widget.css?inline";
 
 let stylesInjected = false;
+const FONT_HREF =
+  "https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&display=swap";
 
 function injectStyles() {
   if (stylesInjected) return;
+
+  // Fira Code, since a host page (e.g. the Gatsby site) has no reason to
+  // have loaded it already - falls back to the system monospace stack
+  // in widget.css's --font-mono if this request is blocked.
+  if (!document.querySelector(`link[href="${FONT_HREF}"]`)) {
+    const fontLink = document.createElement("link");
+    fontLink.rel = "stylesheet";
+    fontLink.href = FONT_HREF;
+    document.head.appendChild(fontLink);
+  }
+
   const style = document.createElement("style");
   style.setAttribute("data-ask-my-portfolio-widget", "");
   style.textContent = widgetCss;

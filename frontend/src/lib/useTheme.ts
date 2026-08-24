@@ -4,6 +4,11 @@ export type Theme = "light" | "dark";
 
 const STORAGE_KEY = "amp-theme";
 
+// Defaults to dark (the phosphor-terminal look) rather than following
+// prefers-color-scheme: it's the intended flagship identity here, and a
+// visitor whose OS happens to be in light mode shouldn't see the
+// secondary "carbon paper" theme first by accident. Still respects an
+// explicit stored choice once someone toggles it.
 function getInitialTheme(): Theme {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
@@ -11,10 +16,7 @@ function getInitialTheme(): Theme {
   } catch {
     // localStorage unavailable (private mode, embedded context), fall through
   }
-  if (typeof window !== "undefined" && window.matchMedia("(prefers-color-scheme: dark)").matches) {
-    return "dark";
-  }
-  return "light";
+  return "dark";
 }
 
 export function useTheme() {

@@ -10,22 +10,29 @@
   CSS are possible in principle, just much less likely than a full
   style reset would be).
 
-  The widget always renders in its own fixed dark scheme (like
-  widget/chat-widget.html did), independent of the host page's theme
-  or the visitor's OS preference, and independent of the standalone
-  app's light/dark toggle. Shared components (MessageBubble, ChatInput,
-  AnswerMeta) use Tailwind's dark: variant expecting the app's
-  class-based toggle on <html>; the widget must never touch the host
-  page's <html> element, so instead this redefines dark: to always
-  match here, making those same dark: styles always active in the
-  widget build without changing the shared components themselves.
+  The widget always renders in the same phosphor-terminal palette as
+  the app's dark mode, independent of the host page's own theme - the
+  shared components (MessageBubble, ChatInput, AnswerMeta, ChatPanel)
+  read plain custom-property-backed utilities like bg-panel/text-fg,
+  not a dark: variant, so defining those tokens once here is enough;
+  no variant-forcing trick needed (contrast with the old version of
+  this file, which had to fight Tailwind's dark: variant explicitly).
 */
 @layer theme, base, components, utilities;
 @import "tailwindcss/theme.css" layer(theme);
 @import "tailwindcss/utilities.css" layer(utilities);
 
-@custom-variant dark (&);
-
 @theme {
-  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: "Fira Code", ui-monospace, "SF Mono", Consolas, monospace;
+
+  --color-bg: #0a0f0b;
+  --color-panel: #0f1613;
+  --color-border: #1f2e27;
+  --color-fg: #d7ecdf;
+  --color-fg-dim: #6f8c7b;
+  --color-accent: #39ff8a;
+  --color-accent-dim: #1e8a52;
+  --color-accent-ink: #06130b;
+  --color-warn: #ffb454;
+  --color-warn-bg: #2a1f0f;
 }

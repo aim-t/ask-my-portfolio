@@ -8,9 +8,9 @@ export function ThemeToggle() {
       type="button"
       onClick={toggleTheme}
       aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
-      className="rounded-lg border border-neutral-300 p-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 dark:border-neutral-700 dark:focus-visible:ring-neutral-100"
+      className="text-fg-dim hover:text-accent hover:border-accent border-border focus-visible:ring-accent shrink-0 rounded-md border px-2.5 py-1.5 text-xs whitespace-nowrap outline-none transition-colors focus-visible:ring-2 focus-visible:ring-offset-2"
     >
-      {theme === "dark" ? "Light" : "Dark"}
+      [{theme === "dark" ? " crt " : " ink "}]
     </button>
   );
 }

@@ -4,6 +4,20 @@ A React + TypeScript + Tailwind CSS interface for the [Ask My Portfolio](../READ
 RAG chatbot. Two build targets share the same components: a standalone app you can
 deploy on its own, and an embeddable widget bundle for dropping onto another site.
 
+## Design
+
+Phosphor-terminal, not generic SaaS. Fira Code throughout (the same font
+aimantariq.tech already uses for its code blocks), a green-on-near-black CRT palette
+by default, and a genuinely different light mode rather than an inverted copy: a
+carbon-copy typewritten page, cream paper with a rust-red accent pulled from the
+classic two-tone typewriter ribbon. The chat panel is styled like a terminal window
+(traffic-light dots, a title bar), messages are prefixed like shell output
+(`>` for what you typed, `#` for the answer), and the page load types itself out
+character by character rather than fading in - a `useTypewriter` hook, not a canned
+library effect. Message entrances and the widget's open/close use `motion`; the
+one-time boot sequence is plain CSS `animation-delay` staggering, no library needed
+for something that only ever plays once.
+
 ## Running it locally
 
 ```

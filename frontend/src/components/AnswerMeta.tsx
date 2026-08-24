@@ -7,20 +7,13 @@ export function AnswerMeta({ sources, provider }: AnswerMetaProps) {
   if (!sources?.length && !provider) return null;
 
   return (
-    <div className="mt-1.5 flex flex-wrap items-center gap-1.5 text-xs">
+    <div className="text-fg-dim mt-1 ml-5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs">
       {sources?.map((source) => (
-        <span
-          key={source}
-          className="rounded-full bg-neutral-100 px-2 py-0.5 text-neutral-600 dark:bg-neutral-800 dark:text-neutral-400"
-        >
+        <span key={source} className="border-border rounded border px-1.5 py-0.5">
           {source}
         </span>
       ))}
-      {provider && (
-        <span className="rounded-full border border-neutral-200 px-2 py-0.5 text-neutral-500 dark:border-neutral-700 dark:text-neutral-500">
-          via {provider}
-        </span>
-      )}
+      {provider && <span className="text-accent-dim">via {provider}</span>}
     </div>
   );
 }

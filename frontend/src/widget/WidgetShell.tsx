@@ -1,3 +1,4 @@
+import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
 import { ChatPanel } from "../components/ChatPanel";
 
@@ -5,36 +6,30 @@ export function WidgetShell() {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className="fixed right-5 bottom-5 z-[9999] font-sans">
-      {isOpen && (
-        <div className="absolute right-0 bottom-[4.5rem] flex h-[28rem] w-[22rem] flex-col overflow-hidden rounded-2xl border border-neutral-800 bg-neutral-950 text-neutral-100 shadow-2xl">
-          <div className="flex items-start justify-between gap-2 bg-neutral-900 px-4 py-3">
-            <div>
-              <p className="text-sm font-semibold">Ask about Aiman</p>
-              <p className="mt-0.5 text-xs text-neutral-400">
-                Answers are grounded in her real CV.
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={() => setIsOpen(false)}
-              aria-label="Close chat"
-              className="rounded-md p-1 text-neutral-400 outline-none hover:text-neutral-100 focus-visible:ring-2 focus-visible:ring-neutral-100"
-            >
-              &#10005;
-            </button>
-          </div>
-          <ChatPanel className="flex-1 px-3 py-2" />
-        </div>
-      )}
-      <button
+    <div className="fixed right-5 bottom-5 z-[9999] font-mono">
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.92, y: 12 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.92, y: 12 }}
+            transition={{ duration: 0.18, ease: "easeOut" }}
+            className="absolute right-0 bottom-[4.5rem]"
+          >
+            <ChatPanel className="h-[28rem] w-[22rem] shadow-2xl" chromeLabel="ask about aiman" />
+          </motion.div>
+        )}
+      </AnimatePresence>
+      <motion.button
         type="button"
         onClick={() => setIsOpen((prev) => !prev)}
         aria-label={isOpen ? "Close chat" : "Open chat"}
-        className="flex h-14 w-14 items-center justify-center rounded-full bg-neutral-900 text-2xl text-white shadow-lg outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-neutral-900"
+        whileHover={{ scale: 1.06 }}
+        whileTap={{ scale: 0.95 }}
+        className="bg-accent text-accent-ink flex h-14 w-14 items-center justify-center rounded-full text-xl font-bold shadow-lg"
       >
-        &#128172;
-      </button>
+        {isOpen ? "×" : ">_"}
+      </motion.button>
     </div>
   );
 }
