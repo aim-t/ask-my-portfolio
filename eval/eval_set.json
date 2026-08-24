@@ -1,0 +1,62 @@
+[
+  {
+    "question": "What is Aiman's IELTS score?",
+    "expected_source": "about.md",
+    "expected_keywords": ["IELTS", "8.0"]
+  },
+  {
+    "question": "Where is Aiman currently studying and what is his MSc in?",
+    "expected_source": "about.md",
+    "expected_keywords": ["Szechenyi", "Computer Science"]
+  },
+  {
+    "question": "What was Aiman's Bachelor's degree and where did he get it?",
+    "expected_source": "about.md",
+    "expected_keywords": ["Electrical Engineering", "NUST"]
+  },
+  {
+    "question": "What was Aiman's role at the Audi Development Camp?",
+    "expected_source": "experience.md",
+    "expected_keywords": ["Integration Lead", "MuJoCo"]
+  },
+  {
+    "question": "What robot did Aiman's team work with at the Audi camp?",
+    "expected_source": "experience.md",
+    "expected_keywords": ["Unitree G1", "humanoid"]
+  },
+  {
+    "question": "What does Aiman do as a Demonstrator at Szechenyi Istvan University?",
+    "expected_source": "experience.md",
+    "expected_keywords": ["exams", "Mathematics", "Calculus"]
+  },
+  {
+    "question": "What did Aiman build at PookiDevs Technologies?",
+    "expected_source": "experience.md",
+    "expected_keywords": ["RAG", "ChromaDB", "REST"]
+  },
+  {
+    "question": "Which LLM providers does Aiman's RAG fallback system support?",
+    "expected_source": "experience.md",
+    "expected_keywords": ["GPT-4", "Claude", "Gemini"]
+  },
+  {
+    "question": "What is the Ask My Portfolio project and how was it built?",
+    "expected_source": "projects.md",
+    "expected_keywords": ["RAG", "ChromaDB", "FastAPI"]
+  },
+  {
+    "question": "What did Aiman build to visualize the robot simulation at the Audi camp?",
+    "expected_source": "projects.md",
+    "expected_keywords": ["MuJoCo", "GUI"]
+  },
+  {
+    "question": "What frontend frameworks does Aiman have experience with?",
+    "expected_source": "skills.md",
+    "expected_keywords": ["React", "Angular"]
+  },
+  {
+    "question": "What databases has Aiman worked with?",
+    "expected_source": "skills.md",
+    "expected_keywords": ["MongoDB", "MySQL", "PostgreSQL"]
+  }
+]

@@ -1,0 +1,12 @@
+services:
+  ask-my-portfolio:
+    build: .
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    volumes:
+      - chroma_store:/app/chroma_store
+
+volumes:
+  chroma_store:

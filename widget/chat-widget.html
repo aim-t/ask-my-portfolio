@@ -1,0 +1,191 @@
+<!--
+  Ask My Portfolio - embeddable chat widget.
+
+  How to use on aimantariq.tech (Gatsby):
+  1. Copy the <style> block and the <div id="amp-widget-root">...</div>
+     plus the <script> block into a React component (e.g. src/components/AskMyPortfolio.jsx),
+     or just paste this whole file's body into a Gatsby "html.js" injected
+     snippet / a plain <iframe src="/chat-widget.html"> if you'd rather keep
+     it fully isolated from the rest of the site's React tree.
+  2. Change API_BASE_URL below to your deployed backend URL
+     (e.g. https://ask-my-portfolio.onrender.com) before shipping.
+  3. That's it - no build step, no dependencies. Pure HTML/CSS/JS.
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Ask My Portfolio</title>
+<style>
+  #amp-widget-root {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 9999;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+  #amp-bubble {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: #17365d;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    font-size: 24px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.25);
+  }
+  #amp-panel {
+    display: none;
+    position: absolute;
+    bottom: 68px;
+    right: 0;
+    width: 340px;
+    max-height: 460px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+    overflow: hidden;
+    flex-direction: column;
+  }
+  #amp-panel.open { display: flex; }
+  #amp-header {
+    background: #17365d;
+    color: #fff;
+    padding: 12px 14px;
+    font-weight: 600;
+    font-size: 14px;
+  }
+  #amp-header small { display: block; font-weight: 400; opacity: 0.8; font-size: 11px; margin-top: 2px; }
+  #amp-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px;
+    font-size: 13px;
+    line-height: 1.4;
+    color: #1a1a1a;
+  }
+  .amp-msg { margin-bottom: 10px; max-width: 90%; }
+  .amp-msg.user { margin-left: auto; text-align: right; }
+  .amp-bubble-text {
+    display: inline-block;
+    padding: 8px 11px;
+    border-radius: 10px;
+  }
+  .amp-msg.user .amp-bubble-text { background: #17365d; color: #fff; }
+  .amp-msg.bot .amp-bubble-text { background: #f0f2f5; color: #1a1a1a; }
+  .amp-sources { font-size: 10px; color: #888; margin-top: 3px; }
+  #amp-inputrow {
+    display: flex;
+    border-top: 1px solid #eee;
+    padding: 8px;
+    gap: 6px;
+  }
+  #amp-input {
+    flex: 1;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 8px 10px;
+    font-size: 13px;
+    outline: none;
+  }
+  #amp-send {
+    background: #17365d;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 0 14px;
+    cursor: pointer;
+    font-size: 13px;
+  }
+  #amp-send:disabled { opacity: 0.5; cursor: default; }
+</style>
+</head>
+<body>
+
+<div id="amp-widget-root">
+  <div id="amp-panel">
+    <div id="amp-header">
+      Ask about Aiman
+      <small>Answers are grounded in his real CV - ask about his experience, skills, or projects.</small>
+    </div>
+    <div id="amp-messages"></div>
+    <div id="amp-inputrow">
+      <input id="amp-input" type="text" placeholder="e.g. Does Aiman have RAG experience?" />
+      <button id="amp-send">Send</button>
+    </div>
+  </div>
+  <button id="amp-bubble" aria-label="Open chat">💬</button>
+</div>
+
+<script>
+(function () {
+  // CHANGE THIS before deploying - point it at your deployed FastAPI backend.
+  var API_BASE_URL = "http://localhost:8000";
+
+  var bubble = document.getElementById("amp-bubble");
+  var panel = document.getElementById("amp-panel");
+  var messages = document.getElementById("amp-messages");
+  var input = document.getElementById("amp-input");
+  var sendBtn = document.getElementById("amp-send");
+
+  bubble.addEventListener("click", function () {
+    panel.classList.toggle("open");
+    if (panel.classList.contains("open") && messages.children.length === 0) {
+      addMessage("bot", "Hi! Ask me anything about Aiman's experience, skills, or projects.");
+    }
+  });
+
+  function addMessage(role, text, sources) {
+    var wrap = document.createElement("div");
+    wrap.className = "amp-msg " + role;
+    var bubbleText = document.createElement("div");
+    bubbleText.className = "amp-bubble-text";
+    bubbleText.textContent = text;
+    wrap.appendChild(bubbleText);
+    if (sources && sources.length) {
+      var src = document.createElement("div");
+      src.className = "amp-sources";
+      src.textContent = "Source: " + sources.join(", ");
+      wrap.appendChild(src);
+    }
+    messages.appendChild(wrap);
+    messages.scrollTop = messages.scrollHeight;
+  }
+
+  function send() {
+    var question = input.value.trim();
+    if (!question) return;
+    addMessage("user", question);
+    input.value = "";
+    sendBtn.disabled = true;
+
+    fetch(API_BASE_URL + "/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ question: question }),
+    })
+      .then(function (res) {
+        if (!res.ok) throw new Error("Request failed (" + res.status + ")");
+        return res.json();
+      })
+      .then(function (data) {
+        addMessage("bot", data.answer, data.sources);
+      })
+      .catch(function (err) {
+        addMessage("bot", "Sorry, I couldn't reach the backend right now. (" + err.message + ")");
+      })
+      .finally(function () {
+        sendBtn.disabled = false;
+      });
+  }
+
+  sendBtn.addEventListener("click", send);
+  input.addEventListener("keydown", function (e) {
+    if (e.key === "Enter") send();
+  });
+})();
+</script>
+
+</body>
+</html>
