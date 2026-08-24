@@ -17,11 +17,36 @@ from chromadb.api.types import EmbeddingFunction
 from sklearn.feature_extraction.text import TfidfVectorizer, ENGLISH_STOP_WORDS
 
 # "aiman" and "tariq" show up in nearly every chunk in this corpus (every
-# section is about him), so on their own they carry no retrieval signal
+# section is about her), so on their own they carry no retrieval signal
 # and would otherwise dilute the ranking toward generic overlap instead
 # of the actual technical terms in a question. Treat them as stopwords
 # on top of the standard English list.
-_STOP_WORDS = list(ENGLISH_STOP_WORDS) + ["aiman", "tariq"]
+_STOP_WORDS = set(ENGLISH_STOP_WORDS) | {"aiman", "tariq"}
+
+_WORD_RE = re.compile(r"[a-zA-Z]+")
+
+
+def _stem(word):
+    """
+    Minimal suffix-stripping stemmer (e.g. "databases" -> "database",
+    "companies" -> "company"). Without this, a plural in a question
+    ("What databases has Aiman worked with?") shares zero tokens with
+    the singular form in the source text ("## Database Management"),
+    so the chunk that actually answers the question never gets
+    retrieved. A real stemmer library was skipped to keep this
+    dependency-free, matching the rest of the TF-IDF setup.
+    """
+    if len(word) > 4 and word.endswith("ies"):
+        return word[:-3] + "y"
+    if len(word) > 3 and word.endswith("s") and not word.endswith("ss"):
+        return word[:-1]
+    return word
+
+
+def _analyze(text):
+    """Tokenize, drop stopwords, stem, then emit unigrams and bigrams."""
+    tokens = [_stem(w) for w in _WORD_RE.findall(text.lower()) if w not in _STOP_WORDS]
+    return tokens + [f"{a} {b}" for a, b in zip(tokens, tokens[1:])]
 
 from app.config import (
     DATA_DIR,
@@ -62,7 +87,7 @@ class TfidfEmbeddingFunction(EmbeddingFunction):
 
     def fit(self, corpus):
         self.vectorizer = TfidfVectorizer(
-            stop_words=_STOP_WORDS, max_features=4096, ngram_range=(1, 2), sublinear_tf=True
+            analyzer=_analyze, max_features=4096, sublinear_tf=True
         )
         self.vectorizer.fit(corpus)
         self.path.parent.mkdir(parents=True, exist_ok=True)
