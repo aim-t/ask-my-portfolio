@@ -2,21 +2,30 @@
 Multi-provider LLM wrapper with fallback logic.
 
 Mirrors the pattern Aiman already shipped in production at PookiDevs:
-try OpenAI first, fall back to Anthropic, then to Gemini. Whichever
-provider has a key configured and responds successfully wins. If none
-of the three keys are configured, this raises a clear error rather than
-failing silently - see NoProviderAvailable below.
+try OpenAI first, fall back to Anthropic, then Gemini, then Groq.
+Whichever provider has a key configured and responds successfully
+wins. If none of the four keys are configured, this raises a clear
+error rather than failing silently - see NoProviderAvailable below.
 
-Add a fourth provider by writing one function with the same signature
+Groq is last in the chain, not because it is worse, but because it was
+added later as a fallback for Gemini's free-tier daily quota (20
+requests/day on the model this project defaults to) being easy to
+exhaust during normal development and testing. Groq's free tier has
+much higher limits, at the cost of running open models (Llama, etc.)
+rather than Gemini's own.
+
+Add a fifth provider by writing one function with the same signature
 (prompt, system) -> str and adding it to PROVIDER_CHAIN.
 """
 from app.config import (
     OPENAI_API_KEY,
     ANTHROPIC_API_KEY,
     GEMINI_API_KEY,
+    GROQ_API_KEY,
     OPENAI_MODEL,
     ANTHROPIC_MODEL,
     GEMINI_MODEL,
+    GROQ_MODEL,
 )
 
 
@@ -62,12 +71,29 @@ def _call_gemini(prompt, system):
     return resp.text.strip()
 
 
+def _call_groq(prompt, system):
+    from groq import Groq
+
+    client = Groq(api_key=GROQ_API_KEY)
+    resp = client.chat.completions.create(
+        model=GROQ_MODEL,
+        messages=[
+            {"role": "system", "content": system},
+            {"role": "user", "content": prompt},
+        ],
+        temperature=0.2,
+        max_tokens=500,
+    )
+    return resp.choices[0].message.content.strip()
+
+
 # Ordered (provider_name, api_key, call_fn) - first one with a key set is
 # tried first; on any exception, we move to the next available provider.
 PROVIDER_CHAIN = [
     ("openai", OPENAI_API_KEY, _call_openai),
     ("anthropic", ANTHROPIC_API_KEY, _call_anthropic),
     ("gemini", GEMINI_API_KEY, _call_gemini),
+    ("groq", GROQ_API_KEY, _call_groq),
 ]
 
 SYSTEM_PROMPT = (
@@ -112,7 +138,7 @@ def generate(question, chunks):
     if not tried:
         raise NoProviderAvailable(
             "No LLM provider is configured. Set OPENAI_API_KEY, ANTHROPIC_API_KEY, "
-            "or GEMINI_API_KEY in your .env file."
+            "GEMINI_API_KEY, or GROQ_API_KEY in your .env file."
         )
     raise NoProviderAvailable(
         f"All configured providers failed ({', '.join(tried)}). Last error: {last_error}"

@@ -21,7 +21,7 @@ app/rag.py            -> chunk by section, embed with a self-fit TF-IDF
       |
       v
 app/llm.py             -> build a grounded prompt from the retrieved
-                          chunks, call OpenAI -> Anthropic -> Gemini
+                          chunks, call OpenAI -> Anthropic -> Gemini -> Groq
                           in order until one responds
       |
       v
@@ -41,7 +41,7 @@ redteam/report.py         -> turns the results into report.md
 
 **Evaluation: a small custom harness, not RAGAS.** RAGAS is the tool most current guides recommend for this kind of project. It was tried first here and its installed package currently has a broken import chain (a missing `langchain_community` submodule it depends on), which is a fragile foundation for something meant to just work in a day or two. `eval/run_eval.py` instead measures the two things that actually matter: retrieval recall (does the retriever pull the chunk the answer lives in) with zero API keys required, and answer faithfulness (does the generated answer actually contain the expected facts) once a provider key is set. It is about 130 lines, fully readable, and defensible line by line in an interview.
 
-**Multi-provider LLM fallback.** Mirrors the pattern already shipped in production at PookiDevs: try OpenAI, fall back to Anthropic, fall back to Gemini. If one provider is down, rate-limited, or its key is missing, the next one is tried automatically. Add a fourth provider by writing one function with the same signature in `app/llm.py`.
+**Multi-provider LLM fallback.** Mirrors the pattern already shipped in production at PookiDevs: try OpenAI, fall back to Anthropic, fall back to Gemini, fall back to Groq. If one provider is down, rate-limited, or its key is missing, the next one is tried automatically. Groq was added after repeatedly hitting Gemini's free-tier daily quota (20 requests/day on the default model) during normal development and testing; Groq's free tier has much higher limits, at the cost of running open models instead of Gemini's own. Add a fifth provider by writing one function with the same signature in `app/llm.py`.
 
 **Chunking by markdown section, not fixed word count.** Each `##` header in a data file becomes its own chunk boundary before word-count chunking is applied within it. This keeps unrelated topics (e.g. "Database Management" and "Soft Skills" in `skills.md`) from being merged into a single diluted chunk, which measurably improved retrieval recall during development.
 
@@ -99,4 +99,4 @@ Results land in `redteam/results/`: a timestamped JSON (DeepTeam's own format) a
 
 ## What you need to supply
 
-Everything in this repository runs and is tested with zero API keys except two things: the app's own "generate an answer" step (needs one of `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, or `GEMINI_API_KEY`), and the red-team scan (needs `OPENAI_API_KEY` specifically, since that's what DeepTeam's default simulator/evaluator models use). Neither has been run end to end here for that reason; everything upstream of them (retrieval, the app's startup and error handling, the red-team harness's connectivity check and callback wiring) has been, with the numbers and command output above.
+Everything in this repository runs and is tested with zero API keys except two things: the app's own "generate an answer" step (needs one of `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `GEMINI_API_KEY`, or `GROQ_API_KEY`), and the red-team scan (needs `OPENAI_API_KEY` specifically, since that's what DeepTeam's default simulator/evaluator models use). Neither has been run end to end here for that reason; everything upstream of them (retrieval, the app's startup and error handling, the red-team harness's connectivity check and callback wiring) has been, with the numbers and command output above.
