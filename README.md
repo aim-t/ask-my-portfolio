@@ -72,6 +72,11 @@ eval/
   run_eval.py     retrieval recall + answer faithfulness scoring
 widget/
   chat-widget.html   drop-in embeddable chat bubble
+frontend/
+  React + TypeScript + Tailwind UI, two build targets sharing the same
+  chat component: a standalone app (npm run build) and an embeddable
+  widget bundle (npm run build:widget). Dev server: npm run dev (after
+  npm install and cp .env.example .env). See frontend/README.md.
 Dockerfile, docker-compose.yml, requirements.txt, .env.example
 ```
 

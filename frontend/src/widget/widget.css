@@ -1,0 +1,31 @@
+/*
+  Widget build only: imports Tailwind's theme and utility layers but
+  deliberately skips preflight.css (the base reset). Preflight resets
+  margins, headings, buttons, etc. on the WHOLE host page it's injected
+  into, which would break the Gatsby site's own styling once this is
+  embedded. Utility classes are additive and only apply where used, so
+  skipping preflight is enough to make this safe to drop onto an
+  existing page. See frontend/README.md for the residual tradeoff this
+  choice makes (utility class name collisions with the host page's own
+  CSS are possible in principle, just much less likely than a full
+  style reset would be).
+
+  The widget always renders in its own fixed dark scheme (like
+  widget/chat-widget.html did), independent of the host page's theme
+  or the visitor's OS preference, and independent of the standalone
+  app's light/dark toggle. Shared components (MessageBubble, ChatInput,
+  AnswerMeta) use Tailwind's dark: variant expecting the app's
+  class-based toggle on <html>; the widget must never touch the host
+  page's <html> element, so instead this redefines dark: to always
+  match here, making those same dark: styles always active in the
+  widget build without changing the shared components themselves.
+*/
+@layer theme, base, components, utilities;
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/utilities.css" layer(utilities);
+
+@custom-variant dark (&);
+
+@theme {
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
