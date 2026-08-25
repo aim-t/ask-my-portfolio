@@ -1,0 +1,25 @@
+name: Keep Render backend awake
+
+# Render's free tier spins the service down after ~15 minutes idle, and
+# the first request after that takes 30-50s to wake it back up. Pinging
+# more often than that keeps it warm. Runs on a schedule and can also be
+# fired manually from the Actions tab.
+#
+# Known limitation: GitHub disables scheduled workflows automatically if
+# a repository goes 60 days with no commits at all. If pings stop
+# showing up in the Actions tab after a long quiet period, re-enable it
+# there (Actions -> this workflow -> "Enable workflow").
+on:
+  schedule:
+    - cron: "3,13,23,33,43,53 * * * *"
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping /health
+        run: |
+          curl -s -o /dev/null -w "status: %{http_code}, time: %{time_total}s\n" \
+            --max-time 60 \
+            https://ask-my-portfolio.onrender.com/health || true
