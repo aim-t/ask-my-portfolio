@@ -1,5 +1,6 @@
 import { AboutSection } from "./components/AboutSection";
 import { ChatPanel } from "./components/ChatPanel";
+import { ContactSection } from "./components/ContactSection";
 import { Header } from "./components/Header";
 
 function App() {
@@ -12,6 +13,9 @@ function App() {
         </div>
         <div className="stagger-in" style={{ animationDelay: "1.5s" }}>
           <AboutSection />
+        </div>
+        <div className="stagger-in" style={{ animationDelay: "1.7s" }}>
+          <ContactSection />
         </div>
       </main>
     </div>
