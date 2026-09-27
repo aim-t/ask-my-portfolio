@@ -17,3 +17,7 @@ Aiman speaks English at a certified IELTS Academic Overall Band Score of 8.0. He
 ## Location and availability
 
 She is based in Gyor, Hungary, and is currently looking for full-stack or AI/ML engineering roles, including internships and trainee positions, in Gyor and nearby areas in Hungary and Europe.
+
+## Contact
+
+The best way to reach Aiman is by email at aimantariqsarwar@gmail.com. She is also on GitHub at github.com/aim-t and LinkedIn at linkedin.com/in/aiman-tariq-sarwar.
